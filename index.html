@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <title>SADEEM X – مولّد الشهادات</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <!-- خط عربي -->
+  <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@400;500;700&display=swap" rel="stylesheet">
+
+  <!-- ملف الستايل -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header>
+  <div class="brand">
+    <img src="logo.png" alt="SADEEM X Logo" class="brand-logo-img">
+  </div>
+  <div class="badge">
+    مولّد شهادات تفاعلي
+  </div>
+</header>
+
+<main>
+  <div class="app">
+
+    <!-- لوحة التحكم -->
+    <section class="card controls">
+      <div class="card-title">إعداد الشهادة</div>
+      <div class="card-subtitle">
+        قم برفع تصميم الشهادة، ثم أدخل البيانات المطلوبة واضبط أماكن النصوص على التصميم.
+      </div>
+
+      <div class="field">
+        <label>ملف الشهادة (صورة أو PDF)</label>
+        <input id="fileInput" type="file" accept="image/*,.pdf">
+        <div class="hint">يدعم صور PNG / JPG وملفات PDF (يتم استخدام الصفحة الأولى).</div>
+        <div id="fileError" class="error-text" style="display:none;"></div>
+      </div>
+
+      <hr style="border:none;border-top:1px solid var(--border-soft);margin:4px 0 10px;">
+
+      <div class="field">
+        <label>اسم المستلم</label>
+        <input id="nameInput" type="text" placeholder="أدخل اسم المستلم">
+      </div>
+
+      <div class="field">
+        <label>قائمة الأسماء (اختياري) – كل اسم في سطر مستقل</label>
+        <textarea id="namesInput" placeholder="اكتب كل اسم في سطر منفصل لتوليد شهادة لكل اسم..."></textarea>
+        <div class="hint">في حال إدخال أكثر من اسم سيتم إنشاء شهادة منفصلة لكل اسم.</div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label>حجم خط الاسم</label>
+          <input id="nameSizeInput" type="number" min="18" max="60" value="26">
+        </div>
+        <div class="field">
+          <label>لون الاسم</label>
+          <input id="nameColorInput" type="color" value="#5b2c90">
+        </div>
+      </div>
+
+      <!-- نص الشهادة -->
+      <div class="field">
+        <div class="toggle-row">
+          <input id="useBodyInput" type="checkbox">
+          <span>إضافة نص الشهادة</span>
+        </div>
+        <div id="bodySettings" style="display:none; margin-top:6px;">
+          <label>نص الشهادة</label>
+          <textarea id="bodyInput" placeholder="اكتب نص الشهادة هنا..."></textarea>
+          <div class="hint">يمكن إدخال نص الشهادة كما سيظهر في التصميم (مثلاً: تقديراً لمشاركته المميزة في...).</div>
+          <div class="row" style="margin-top:6px;">
+            <div class="field">
+              <label>حجم خط نص الشهادة</label>
+              <input id="bodySizeInput" type="number" min="12" max="40" value="18">
+            </div>
+            <div class="field">
+              <label>لون نص الشهادة</label>
+              <input id="bodyColorInput" type="color" value="#2a213d">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- تاريخ الشهادة -->
+      <div class="field">
+        <div class="toggle-row">
+          <input id="useDateInput" type="checkbox">
+          <span>إضافة تاريخ الشهادة</span>
+        </div>
+        <div id="dateSettings" style="display:none; margin-top:6px;">
+          <div class="row">
+            <div class="field">
+              <label>نوع التاريخ</label>
+              <select id="dateTypeInput">
+                <option value="hijri">هجري</option>
+                <option value="gregorian">ميلادي</option>
+              </select>
+            </div>
+            <div class="field">
+              <label>التاريخ</label>
+              <input id="dateInput" type="text" placeholder="مثال: 1447-05-21 أو 2025-02-02">
+            </div>
+          </div>
+          <div class="row" style="margin-top:6px;">
+            <div class="field">
+              <label>حجم خط التاريخ</label>
+              <input id="dateSizeInput" type="number" min="10" max="30" value="14">
+            </div>
+            <div class="field">
+              <label>لون التاريخ</label>
+              <input id="dateColorInput" type="color" value="#000000">
+            </div>
+          </div>
+          <div class="hint">
+            يتم عرض التاريخ بالأرقام مع لاحقة (هـ) للتاريخ الهجري أو (م) للتاريخ الميلادي.
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <button id="resetPositionsBtn" class="btn btn-secondary btn-full">
+          إعادة ضبط أماكن النصوص
+        </button>
+      </div>
+
+      <!-- زر PDF واحد -->
+      <div class="row">
+        <button id="downloadPdfBtn" class="btn btn-primary btn-full">
+          تحميل الشهادات بصيغة PDF
+        </button>
+      </div>
+
+      <!-- زر ZIP يظهر فقط لو فيه أكثر من اسم -->
+      <div class="row" id="zipRow" style="display:none;">
+         <button id="downloadZipBtn" class="btn btn-primary  btn-full">
+          تحميل الشهادات في ملف مضغوط (ZIP)
+        </button>
+      </div>
+
+      <div id="loadingIndicator" class="loading-indicator">
+        جارٍ توليد الشهادات، يرجى الانتظار...
+      </div>
+
+      <div class="chip-row">
+        <div class="chip">يمكن سحب النصوص وتحريكها مباشرة على الشهادة</div>
+        <div class="chip">يدعم توليد عدة شهادات من قائمة أسماء واحدة</div>
+      </div>
+    </section>
+
+    <!-- المعاينة -->
+    <section class="card preview-card">
+      <div class="preview-header">
+        <div>
+          <div class="preview-title">معاينة الشهادة</div>
+          <div class="hint">يمكنك سحب الاسم، ونص الشهادة، والتاريخ لوضعها في المكان المناسب قبل التصدير.</div>
+        </div>
+      </div>
+
+      <div class="preview-wrapper">
+        <div id="previewInner" class="preview-inner" style="display:none;">
+          <img id="certificateBackground" alt="خلفية الشهادة">
+          <div id="nameText" class="draggable-text" data-role="name">اسم المستلم</div>
+          <div id="bodyText" class="draggable-text" data-role="body">نص الشهادة</div>
+          <div id="dateText" class="draggable-text" data-role="date">1447-05-21هـ</div>
+        </div>
+
+        <div id="placeholder" class="placeholder">
+          يرجى رفع ملف الشهادة (صورة أو PDF) لعرض المعاينة.
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<!-- مكتبات التوليد -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+
+<!-- مكتبات الضغط والحفظ -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/2.0.5/FileSaver.min.js"></script>
+
+<!-- ملف الجافاسكربت -->
+<script src="colorExtractor.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>

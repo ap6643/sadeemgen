@@ -1,0 +1,402 @@
+:root {
+  --primary: #5b2c90;
+  --primary-dark: #3b1c63;
+  --accent: #c287ff;
+  --bg: #f6f3ff;
+  --card-bg: #ffffff;
+  --text-main: #1f1b2e;
+  --border-soft: #e0d6ff;
+  --danger: #d62839;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  padding: 0;
+  font-family: 'Tajawal', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  background: radial-gradient(circle at top left, #fdfbff 0, var(--bg) 40%, #ece4ff 100%);
+  color: var(--text-main);
+}
+
+header {
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: linear-gradient(90deg, var(--primary-dark), var(--primary));
+  color: #fff;
+  box-shadow: 0 10px 25px rgba(20, 5, 60, 0.35);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.brand-logo-img {
+  height: 38px;
+  object-fit: contain;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: rgba(194, 135, 255, 0.15);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+main {
+  padding: 24px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
+
+.app {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.card {
+  background: var(--card-bg);
+  border-radius: 18px;
+  padding: 20px 22px;
+  box-shadow: 0 10px 30px rgba(44, 21, 91, 0.1);
+  border: 1px solid var(--border-soft);
+}
+
+.controls {
+  width: 360px;
+  max-width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.card-title {
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+  color: var(--primary-dark);
+}
+
+.card-subtitle {
+  font-size: 12px;
+  color: #6c6880;
+  margin-bottom: 8px;
+}
+
+label {
+  font-size: 13px;
+  font-weight: 500;
+  margin-bottom: 4px;
+  display: block;
+}
+
+input[type="text"],
+input[type="number"],
+select,
+textarea {
+  width: 100%;
+  padding: 9px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  font-family: inherit;
+  font-size: 13px;
+  outline: none;
+  background: #faf7ff;
+  transition: border 0.2s, box-shadow 0.2s, background 0.2s;
+  box-sizing: border-box;
+}
+
+textarea {
+  resize: vertical;
+  min-height: 90px;
+}
+
+input[type="text"]:focus,
+input[type="number"]:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 2px rgba(91, 44, 144, 0.15);
+  background: #fff;
+}
+
+input[type="file"] {
+  width: 100%;
+  font-size: 13px;
+}
+
+input[type="color"] {
+  width: 100%;
+  height: 32px;
+  padding: 0;
+  border-radius: 10px;
+  border: 1px solid var(--border-soft);
+  background: #faf7ff;
+  cursor: pointer;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+.row > .field {
+  flex: 1;
+}
+
+.btn {
+  border: none;
+  border-radius: 999px;
+  padding: 9px 16px;
+  font-size: 13px;
+  font-weight: 600;
+  font-family: inherit;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, background 0.2s;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+  color: #fff;
+  box-shadow: 0 6px 18px rgba(91, 44, 144, 0.4);
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 22px rgba(91, 44, 144, 0.5);
+}
+
+.btn-secondary {
+  background: #f3ecff;
+  color: var(--primary-dark);
+}
+
+.btn-secondary:hover {
+  background: #e7dcff;
+}
+
+.btn-full {
+  width: 100%;
+  justify-content: center;
+}
+
+.preview-card {
+  flex: 1;
+  min-width: 480px;
+  max-width: 880px;
+}
+
+.preview-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.preview-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--primary-dark);
+}
+
+.hint {
+  font-size: 11px;
+  color: #7b7693;
+}
+
+.preview-wrapper {
+  position: relative;
+  background: #fbf9ff;
+  border-radius: 18px;
+  border: 1px dashed rgba(91, 44, 144, 0.35);
+  padding: 14px;
+  overflow: auto;
+  max-height: 75vh;
+}
+
+.preview-inner {
+  position: relative;
+  margin: 0 auto;
+  background: #fff;
+  box-shadow: 0 10px 26px rgba(42, 19, 80, 0.25);
+  border-radius: 8px;
+  overflow: hidden;
+  touch-action: none;
+}
+
+#certificateBackground {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.placeholder {
+  padding: 50px 20px;
+  text-align: center;
+  font-size: 13px;
+  color: #8a84a3;
+}
+
+.draggable-text {
+  position: absolute;
+  min-width: 140px;
+  padding: 0;
+  font-size: 20px;
+  font-weight: 600;
+  color: #2a213d;
+  text-align: center;
+  cursor: move;
+  user-select: none;
+  touch-action: none;
+  background: transparent;
+  border: none;
+  text-shadow: 0 1px 3px rgba(0,0,0,0.25);
+}
+
+.draggable-text[data-role="name"] { font-weight: 700; }
+.draggable-text[data-role="body"] { font-size: 16px; max-width: 70%; }
+.draggable-text[data-role="date"] { font-size: 14px; }
+
+.chip-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.chip {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #f1ecff;
+  color: var(--primary-dark);
+}
+
+.error-text {
+  font-size: 11px;
+  color: var(--danger);
+  margin-top: 4px;
+}
+
+.toggle-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  margin-top: 2px;
+}
+
+.loading-indicator {
+  font-size: 11px;
+  color: var(--primary-dark);
+  text-align: center;
+  margin-top: 6px;
+  display: none;
+}
+
+.loading-indicator::before {
+  content: "";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid rgba(91,44,144,0.2);
+  border-top-color: var(--primary);
+  margin-left: 6px;
+  vertical-align: middle;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* شاشات متوسطة (تابلت تقريبًا) */
+@media (max-width: 1100px) {
+  main {
+    padding: 16px;
+  }
+  .app {
+    gap: 16px;
+  }
+  .preview-card {
+    min-width: 100%;
+  }
+}
+
+/* شاشات صغيرة (جوال) */
+@media (max-width: 900px) {
+  body {
+    background: #f6f3ff;
+  }
+
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+
+  main {
+    padding: 10px;
+  }
+
+  .app {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .controls,
+  .preview-card {
+    width: 100% !important;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .card {
+    padding: 14px 12px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(44, 21, 91, 0.08);
+  }
+
+  .preview-wrapper {
+    max-height: 70vh;
+  }
+
+  .preview-inner {
+    width: 100% !important;
+    height: auto !important;
+  }
+
+  #certificateBackground {
+    width: 100%;
+    height: auto;
+  }
+
+  .draggable-text {
+    font-size: 16px;
+  }
+}
