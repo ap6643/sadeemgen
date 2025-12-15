@@ -33,8 +33,7 @@ Designed to create, customize, and export professional certificates from image o
 /app.js
 /colorExtractor.js
 
-yaml
-نسخ الكود
+
 
 ---
 
@@ -90,8 +89,7 @@ Developed by **Eng. Ahmad Alharthi**
 /app.js
 /colorExtractor.js
 
-yaml
-نسخ الكود
+
 
 ---
 
@@ -106,4 +104,5 @@ yaml
 ## 📜 الترخيص
 رخصة **MIT** © 2025 SADEEM X  
 تطوير وتنفيذ **المهندس أحمد الحارثي**  
+
 📧 [ahmadalharthi98@gmail.com](mailto:ahmadalharthi98@gmail.com)
