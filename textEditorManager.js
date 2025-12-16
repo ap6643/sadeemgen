@@ -1,14 +1,15 @@
 class TextEditorManager {
   /**
    * options = {
-   * container: HTMLElement,
-   * items: [
-   * { key: 'name', element: HTMLElement, sizeInput: HTMLInputElement },
-   * // ...
-   * ],
-   * onSizeChange: (key, newSize) => void,
-   * minSize?: number,
-   * maxSize?: number
+   *   container: HTMLElement,
+   *   items: [
+   *     { key: 'name', element: HTMLElement, sizeInput: HTMLInputElement },
+   *     { key: 'body', element: HTMLElement, sizeInput: HTMLInputElement },
+   *     { key: 'date', element: HTMLElement, sizeInput: HTMLInputElement },
+   *   ],
+   *   onSizeChange: (key, newSize) => void,
+   *   minSize?: number,
+   *   maxSize?: number
    * }
    */
   constructor(options) {
@@ -17,16 +18,12 @@ class TextEditorManager {
     this.onSizeChange = options.onSizeChange || function () {};
     this.minSize = options.minSize || 12;
     this.maxSize = options.maxSize || 72;
-    this.snapThreshold = 20; // العتبة بالبكسل للمحاذاة المغناطيسية
 
     this.selectedItem = null;
     this.isResizing = false;
     this.resizeCorner = null;
     this.resizeStart = null;
     this.resizeBaseSize = null;
-
-    this.isDragging = false;
-    this.dragStart = null;
 
     this.pinchState = null;
     this.overlay = null;
@@ -43,312 +40,227 @@ class TextEditorManager {
   }
 
   createOverlay() {
-    this.overlay = document.createElement('div');
-    this.overlay.className = 'text-overlay-box';
-    this.overlay.style.display = 'none';
-    this.container.appendChild(this.overlay);
+    const box = document.createElement('div');
+    box.className = 'text-overlay-box';
+    box.style.display = 'none';
 
-    const corners = ['top-left', 'top-right', 'bottom-left', 'bottom-right'];
-    corners.forEach(corner => {
-      const handle = document.createElement('div');
-      handle.className = `resize-handle ${corner}`;
-      handle.dataset.corner = corner;
-      handle.addEventListener('mousedown', (e) => this.startResize(e, corner));
-      handle.addEventListener('touchstart', (e) => this.startResize(e, corner), { passive: false });
-      this.overlay.appendChild(handle);
-      this.handles[corner] = handle;
+    const corners = ['tl', 'tr', 'bl', 'br'];
+    corners.forEach((corner) => {
+      const h = document.createElement('div');
+      h.className = 'text-overlay-handle text-overlay-handle-' + corner;
+      h.dataset.corner = corner;
+      box.appendChild(h);
+      this.handles[corner] = h;
+    });
+
+    this.container.appendChild(box);
+    this.overlay = box;
+
+    // الماوس لإعادة تحجيم النص من الزوايا
+    Object.values(this.handles).forEach((handle) => {
+      handle.addEventListener('mousedown', (e) => this.startResize(e));
+      handle.addEventListener('touchstart', (e) => this.startResize(e), {
+        passive: false
+      });
     });
   }
 
   bindItemEvents() {
-    this.items.forEach(item => {
-      item.element.addEventListener('mousedown', (e) => this.selectItem(e, item));
-      item.element.addEventListener('touchstart', (e) => this.selectItem(e, item), { passive: false });
-      item.element.addEventListener('wheel', (e) => this.handleWheel(e, item));
-      item.element.addEventListener('touchmove', (e) => this.handleTouchMove(e, item), { passive: false });
-      item.element.addEventListener('touchend', (e) => this.handleTouchEnd(e, item));
+    this.items.forEach((item) => {
+      const el = item.element;
+
+      // اختيار النص
+      el.addEventListener('mousedown', (e) => {
+        // نخلي السحب يكمل طبيعي، بس نحدد العنصر
+        this.selectItem(item);
+      });
+
+      el.addEventListener('touchstart', (e) => {
+        this.selectItem(item);
+      });
+
+      // تغيير الحجم بالـ wheel على الكمبيوتر
+      el.addEventListener(
+        'wheel',
+        (e) => {
+          if (!this.selectedItem || this.selectedItem.key !== item.key) return;
+          e.preventDefault();
+          const delta = e.deltaY;
+          this.adjustFontSize(item, delta);
+        },
+        { passive: false }
+      );
+
+      // Pinch على الجوال
+      el.addEventListener(
+        'touchstart',
+        (e) => this.handleTouchStart(e, item),
+        { passive: false }
+      );
+      el.addEventListener(
+        'touchmove',
+        (e) => this.handleTouchMove(e, item),
+        { passive: false }
+      );
+      el.addEventListener('touchend', (e) => this.handleTouchEnd(e, item));
+      el.addEventListener('touchcancel', (e) => this.handleTouchEnd(e, item));
     });
   }
 
   bindGlobalEvents() {
-    document.addEventListener('mousemove', (e) => this.onResizeMove(e));
-    document.addEventListener('mouseup', () => this.endResize());
-    document.addEventListener('touchmove', (e) => this.onResizeMove(e), { passive: false });
-    document.addEventListener('touchend', () => this.endResize());
-
-    // لإنهاء التحديد عند النقر خارج النص
-    this.container.addEventListener('click', (e) => {
-      if (!e.target.closest('.draggable-text') && !e.target.closest('.text-overlay-box')) {
-        this.deselectItem();
+    // إخفاء الإطار إذا ضغطنا في مكان فاضي داخل المعاينة
+    this.container.addEventListener('mousedown', (e) => {
+      if (this.isClickOutsideAll(e.target)) {
+        this.clearSelection();
       }
     });
 
-    document.addEventListener('mouseup', () => this.endDrag());
-    document.addEventListener('touchend', () => this.endDrag());
-  }
-  
-  // ==================== وظائف التحديد (Selection) ====================
-
-  selectItem(event, item) {
-    if (this.selectedItem === item) {
-      // إذا كان العنصر محدداً بالفعل، ابدأ السحب بدلاً من إعادة تحديده
-      this.startDrag(event, item);
-      return;
-    }
-
-    if (this.selectedItem) {
-      this.selectedItem.element.classList.remove('selected');
-    }
-
-    this.selectedItem = item;
-    item.element.classList.add('selected');
-    this.updateOverlay(item.element);
-    this.overlay.style.display = 'block';
-
-    event.stopPropagation(); // منع إغلاق الـ overlay من نقر الـ container
-    this.startDrag(event, item); // ابدأ السحب مباشرة بعد التحديد
-  }
-
-  deselectItem() {
-    if (this.selectedItem) {
-      this.selectedItem.element.classList.remove('selected');
-      this.selectedItem = null;
-    }
-    this.overlay.style.display = 'none';
-  }
-
-  updateOverlay(el) {
-    const rect = el.getBoundingClientRect();
-    const containerRect = this.container.getBoundingClientRect();
-
-    // حساب الموقع والحجم النسبي داخل الـ container
-    const width = rect.width;
-    const height = rect.height;
-    const top = rect.top - containerRect.top + this.container.scrollTop;
-    const left = rect.left - containerRect.left + this.container.scrollLeft;
-
-    this.overlay.style.width = `${width}px`;
-    this.overlay.style.height = `${height}px`;
-    this.overlay.style.top = `${top}px`;
-    this.overlay.style.left = `${left}px`;
-  }
-  
-  // ==================== وظائف السحب (Drag) ====================
-
-  startDrag(event, item) {
-    if (!item || this.isResizing) return;
-
-    this.isDragging = true;
-    const pointer = event.touches ? event.touches[0] : event;
-
-    const el = item.element;
-    const elRect = el.getBoundingClientRect();
-    const containerRect = this.container.getBoundingClientRect();
-
-    this.dragStart = {
-      x: pointer.clientX,
-      y: pointer.clientY,
-      offsetX: pointer.clientX - elRect.left,
-      offsetY: pointer.clientY - elRect.top,
-      baseTop: elRect.top - containerRect.top,
-      baseLeft: elRect.left - containerRect.left,
-    };
-
-    el.style.cursor = 'grabbing';
-    document.addEventListener('mousemove', this.onDrag.bind(this));
-    document.addEventListener('touchmove', this.onDrag.bind(this), { passive: false });
-  }
-
-  onDrag(event) {
-    if (!this.isDragging || !this.selectedItem) return;
-
-    event.preventDefault(); // لمنع سحب الصفحة
-
-    const pointer = event.touches ? event.touches[0] : event;
-    const el = this.selectedItem.element;
-    const containerRect = this.container.getBoundingClientRect();
-
-    const dx = pointer.clientX - this.dragStart.x;
-    const dy = pointer.clientY - this.dragStart.y;
-    
-    // حساب الموقع الجديد بالنسبة لحافة الـ container
-    let newTop = this.dragStart.baseTop + dy;
-    let newLeft = this.dragStart.baseLeft + dx;
-    
-    // تطبيق المحاذاة المغناطيسية (Snap)
-    const snapped = this.applyCenterSnap(el, containerRect, newLeft, newTop);
-    
-    // إذا لم يكن هناك محاذاة، استخدم الموقع المحسوب
-    if (!snapped.x) {
-        newLeft = Math.max(0, Math.min(newLeft, containerRect.width - el.offsetWidth));
-    } else {
-        newLeft = snapped.x;
-    }
-    
-    if (!snapped.y) {
-        newTop = Math.max(0, Math.min(newTop, containerRect.height - el.offsetHeight));
-    } else {
-        newTop = snapped.y;
-    }
-
-    // تحديث موقع العنصر باستخدام الـ transform
-    el.style.transform = `translate(0, 0)`; // إلغاء الـ translate(-50%, -50%) الأولي
-    el.style.top = `${newTop}px`;
-    el.style.left = `${newLeft}px`;
-
-    this.updateOverlay(el);
-  }
-
-  endDrag() {
-    if (this.isDragging) {
-      this.isDragging = false;
-      if (this.selectedItem) {
-        this.selectedItem.element.style.cursor = 'grab';
+    this.container.addEventListener('touchstart', (e) => {
+      if (this.isClickOutsideAll(e.target)) {
+        this.clearSelection();
       }
-      document.removeEventListener('mousemove', this.onDrag.bind(this));
-      document.removeEventListener('touchmove', this.onDrag.bind(this));
+    });
+
+    // تحديث الـ overlay أثناء الحركة
+    document.addEventListener('mouseup', () => {
+      this.isResizing = false;
+      this.resizeCorner = null;
+      this.resizeStart = null;
+      this.resizeBaseSize = null;
+      // بعد التوقف عن السحب نتحقق من المحاذاة للمنتصف
+      this.applyCenterSnap();
+    });
+
+    document.addEventListener('touchend', () => {
+      this.isResizing = false;
+      this.resizeCorner = null;
+      this.resizeStart = null;
+      this.resizeBaseSize = null;
+      this.applyCenterSnap();
+    });
+
+    document.addEventListener('mousemove', (e) => {
+      if (this.isResizing) {
+        this.onResizeMove(e);
+      }
+    });
+
+    document.addEventListener('touchmove', (e) => {
+      if (this.isResizing) {
+        this.onResizeMove(e);
+      }
+    });
+  }
+
+  isClickOutsideAll(target) {
+    if (!this.overlay) return true;
+    if (this.overlay.contains(target)) return false;
+
+    for (const item of this.items) {
+      if (item.element.contains(target)) return false;
+    }
+    return true;
+  }
+
+  selectItem(item) {
+    this.selectedItem = item;
+    this.overlay.style.display = 'block';
+    this.updateOverlayRect();
+
+    if (!this.animating) {
+      this.animating = true;
+      const loop = () => {
+        if (!this.selectedItem) {
+          this.animating = false;
+          return;
+        }
+        this.updateOverlayRect();
+        requestAnimationFrame(loop);
+      };
+      requestAnimationFrame(loop);
     }
   }
 
-  applyCenterSnap(el, containerRect, newLeft, newTop) {
-    const elRect = el.getBoundingClientRect();
-    const elWidth = elRect.width;
-    const elHeight = elRect.height;
-    
-    const containerCenter = containerRect.width / 2;
-    const elCenter = newLeft + elWidth / 2;
-    
-    const snapped = { x: false, y: false };
-
-    // Snap أفقي للمنتصف
-    if (Math.abs(elCenter - containerCenter) < this.snapThreshold) {
-      newLeft = containerCenter - elWidth / 2;
-      el.classList.add('snapped-x');
-      this.overlay.classList.add('snapped');
-      snapped.x = newLeft;
-    } else {
-      el.classList.remove('snapped-x');
-      this.overlay.classList.remove('snapped');
+  clearSelection() {
+    this.selectedItem = null;
+    if (this.overlay) {
+      this.overlay.style.display = 'none';
     }
-    
-    // يمكن إضافة Snap عمودي هنا إذا لزم الأمر
-
-    return snapped;
   }
-  
-  // ==================== وظائف تغيير الحجم (Resize) ====================
 
-  startResize(event, corner) {
+  updateOverlayRect() {
+    if (!this.selectedItem || !this.overlay) return;
+
+    const el = this.selectedItem.element;
+    if (!el.offsetWidth || !el.offsetHeight) return;
+
+    const containerRect = this.container.getBoundingClientRect();
+    const rect = el.getBoundingClientRect();
+
+    const left = rect.left - containerRect.left;
+    const top = rect.top - containerRect.top;
+
+    this.overlay.style.left = left + 'px';
+    this.overlay.style.top = top + 'px';
+    this.overlay.style.width = rect.width + 'px';
+    this.overlay.style.height = rect.height + 'px';
+  }
+
+  // تغيير الحجم بناء على Scroll
+  adjustFontSize(item, delta) {
+    const sizeInput = item.sizeInput;
+    const current = parseFloat(sizeInput.value) || 20;
+    const step = delta > 0 ? -1 : 1;
+    let next = current + step;
+    next = Math.max(this.minSize, Math.min(this.maxSize, next));
+    if (next === current) return;
+
+    this.onSizeChange(item.key, next);
+  }
+
+  // === Resize من الزوايا ===
+  startResize(event) {
+    event.preventDefault();
+    event.stopPropagation();
     if (!this.selectedItem) return;
 
-    event.preventDefault();
-    event.stopPropagation(); // منع بدأ السحب (Drag)
-    
+    const touch = event.touches ? event.touches[0] : event;
     this.isResizing = true;
-    this.overlay.classList.add('resizing');
-    this.resizeCorner = corner;
+    this.resizeCorner = event.target.dataset.corner || null;
+    this.resizeStart = { x: touch.clientX, y: touch.clientY };
 
-    const pointer = event.touches ? event.touches[0] : event;
-    const el = this.selectedItem.element;
-
-    this.resizeStart = {
-      x: pointer.clientX,
-      y: pointer.clientY,
-      elWidth: el.offsetWidth,
-      elHeight: el.offsetHeight,
-    };
-    
-    // استخلاص حجم الخط الحالي
-    const currentSize = parseFloat(window.getComputedStyle(el).fontSize);
-    this.resizeBaseSize = currentSize;
+    const sizeInput = this.selectedItem.sizeInput;
+    this.resizeBaseSize = parseFloat(sizeInput.value) || 20;
   }
 
   onResizeMove(event) {
     if (!this.isResizing || !this.selectedItem) return;
 
-    event.preventDefault();
-    const pointer = event.touches ? event.touches[0] : event;
-    const el = this.selectedItem.element;
+    const touch = event.touches ? event.touches[0] : event;
+    const dx = touch.clientX - this.resizeStart.x;
+    const dy = touch.clientY - this.resizeStart.y;
 
-    const dx = pointer.clientX - this.resizeStart.x;
-    const dy = pointer.clientY - this.resizeStart.y;
-    
-    let change = 0;
-    const scaleFactor = 0.08; // لضبط حساسية التكبير
-
-    // تحديد الاتجاه بناءً على الزاوية المسحوبة (تبسيط لحساب التغيير)
-    if (this.resizeCorner.includes('left') || this.resizeCorner.includes('right')) {
-      change += Math.abs(dx);
-    }
-    if (this.resizeCorner.includes('top') || this.resizeCorner.includes('bottom')) {
-      change += Math.abs(dy);
-    }
-
-    // تحديد اتجاه التكبير/التصغير (للداخل أو للخارج)
-    let direction = 1;
-    if (
-        (this.resizeCorner.includes('top') && dy > 0) || // سحب المقبض العلوي للأسفل = تصغير
-        (this.resizeCorner.includes('bottom') && dy < 0) || // سحب المقبض السفلي للأعلى = تصغير
-        (this.resizeCorner.includes('left') && dx > 0) || // سحب المقبض الأيسر لليمين = تصغير
-        (this.resizeCorner.includes('right') && dx < 0)    // سحب المقبض الأيمن لليسار = تصغير
-    ) {
-        direction = -1;
-    }
-    
-    const delta = direction * change * scaleFactor;
-    let nextSize = this.resizeBaseSize + delta;
-    
-    nextSize = Math.max(this.minSize, Math.min(this.maxSize, nextSize));
-    this.onSizeChange(this.selectedItem.key, nextSize);
-
-    // تحديث الـ overlay فوراً (بدون انتظار دورة التحديث الرئيسية)
-    el.style.fontSize = `${nextSize}px`;
-    this.updateOverlay(el);
-  }
-
-  endResize() {
-    if (this.isResizing) {
-      this.isResizing = false;
-      this.overlay.classList.remove('resizing');
-    }
-  }
-
-  // ==================== وظائف عجلة الماوس واللمس (Pinch/Wheel) ====================
-
-  handleWheel(event, item) {
-    if (this.selectedItem !== item) {
-      this.selectItem(event, item);
-    }
-
-    event.preventDefault(); // منع سحب الصفحة
-    
-    const currentSize = parseFloat(window.getComputedStyle(item.element).fontSize);
-    let delta = event.deltaY > 0 ? -1 : 1; // تصغير عند التمرير للأسفل
-
-    let next = currentSize + delta;
+    // نستخدم التغير الرأسي كمؤشر على التكبير/التصغير
+    const delta = (Math.abs(dx) > Math.abs(dy) ? dx : -dy) / 10;
+    let next = this.resizeBaseSize + delta;
     next = Math.max(this.minSize, Math.min(this.maxSize, next));
-    
-    this.onSizeChange(item.key, next);
-    item.element.style.fontSize = `${next}px`;
-    this.updateOverlay(item.element); // تحديث الـ overlay
+
+    this.onSizeChange(this.selectedItem.key, next);
   }
 
+  // === Pinch على الجوال ===
   handleTouchStart(event, item) {
-    if (event.touches.length !== 2) return;
-    if (this.selectedItem !== item) {
-        this.selectItem(event, item);
+    if (event.touches.length === 2) {
+      event.preventDefault();
+      const [t1, t2] = event.touches;
+      const dist = this.distance(t1, t2);
+      const base = parseFloat(item.sizeInput.value) || 20;
+      this.pinchState = {
+        key: item.key,
+        baseSize: base,
+        startDist: dist
+      };
     }
-
-    event.stopPropagation();
-
-    const [t1, t2] = event.touches;
-    const dist = this.distance(t1, t2);
-    
-    this.pinchState = {
-      key: item.key,
-      startDist: dist,
-      baseSize: parseFloat(window.getComputedStyle(item.element).fontSize),
-    };
   }
 
   handleTouchMove(event, item) {
@@ -363,10 +275,7 @@ class TextEditorManager {
     const scale = dist / this.pinchState.startDist;
     let next = this.pinchState.baseSize * scale;
     next = Math.max(this.minSize, Math.min(this.maxSize, next));
-    
     this.onSizeChange(this.pinchState.key, next);
-    item.element.style.fontSize = `${next}px`;
-    this.updateOverlay(item.element);
   }
 
   handleTouchEnd(event, item) {
@@ -381,4 +290,24 @@ class TextEditorManager {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
+  // محاذاة للمنتصف إذا العنصر قريب من وسط المعاينة
+  applyCenterSnap() {
+    if (!this.selectedItem) return;
+
+    const el = this.selectedItem.element;
+    const containerRect = this.container.getBoundingClientRect();
+    const rect = el.getBoundingClientRect();
+
+    const centerX = rect.left + rect.width / 2;
+    const containerCenterX = containerRect.left + containerRect.width / 2;
+
+    const diff = centerX - containerCenterX;
+    const threshold = 6; // بكسلات بسيطة للمغناطيس
+
+    if (Math.abs(diff) <= threshold) {
+      const left = containerRect.width / 2 - rect.width / 2;
+      el.style.left = left + 'px';
+      this.updateOverlayRect();
+    }
+  }
 }
