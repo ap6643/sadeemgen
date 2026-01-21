@@ -533,11 +533,11 @@ class CertificateApp {
         this.updateTexts();
 
         const canvas = await html2canvas(this.previewInner, {
-          scale: 2,
+          scale: 1.2,   // تقليل الدقة
           useCORS: true
         });
 
-        const imgData = canvas.toDataURL('image/png');
+        const imgData = canvas.toDataURL('image/jpeg', 0.85);
         const pageW = canvas.width;
         const pageH = canvas.height;
         orientation = pageW >= pageH ? 'l' : 'p';
@@ -548,7 +548,7 @@ class CertificateApp {
           pdf.addPage([pageW, pageH], orientation);
         }
 
-        pdf.addImage(imgData, 'PNG', 0, 0, pageW, pageH);
+        pdf.addImage(imgData, 'JPEG', 0, 0, pageW, pageH);
       }
 
       let filename = 'certificates.pdf';
@@ -602,17 +602,17 @@ class CertificateApp {
         this.updateTexts();
 
         const canvas = await html2canvas(this.previewInner, {
-          scale: 2,
+          scale: 1.2,
           useCORS: true
         });
 
-        const imgData = canvas.toDataURL('image/png');
+        const imgData = canvas.toDataURL('image/jpeg', 0.85);
         const pageW = canvas.width;
         const pageH = canvas.height;
         const orientation = pageW >= pageH ? 'l' : 'p';
 
         const pdf = new jsPDF(orientation, 'pt', [pageW, pageH]);
-        pdf.addImage(imgData, 'PNG', 0, 0, pageW, pageH);
+        pdf.addImage(imgData, 'JPEG', 0, 0, pageW, pageH);
 
         const blob = pdf.output('blob');
         const safeName = this.makeSafeFileName(currentName, i + 1);
