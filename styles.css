@@ -332,7 +332,18 @@ input[type="color"] {
   text-shadow: 0 1px 3px rgba(0,0,0,0.25);
 }
 
-.draggable-text[data-role="name"] { font-weight: 700; }
+/* تثبيت سلوك الاسم العربي */
+.draggable-text[data-role="name"] {
+  font-weight: 700;
+  direction: rtl;
+  unicode-bidi: plaintext;
+  text-align: right;
+  white-space: nowrap;
+
+  /* المهم */
+  left: auto;
+}
+
 .draggable-text[data-role="body"] { font-size: 16px; max-width: 70%; }
 .draggable-text[data-role="date"] { font-size: 14px; }
 

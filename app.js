@@ -51,7 +51,15 @@ class DraggableText {
     left = Math.max(0, Math.min(left, containerRect.width - this.el.offsetWidth));
     top = Math.max(0, Math.min(top, containerRect.height - this.el.offsetHeight));
 
-    this.el.style.left = left + 'px';
+    if (this.el.dataset.role === 'name') {
+      const right =
+        containerRect.width - left - this.el.offsetWidth;
+
+      this.el.style.right = right + 'px';
+      this.el.style.left = 'auto';
+    } else {
+      this.el.style.left = left + 'px';
+    }
     this.el.style.top = top + 'px';
   }
 
