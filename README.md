@@ -13,12 +13,14 @@ SADEEM X allows you to design, customize, and export professional certificates f
 - Upload certificate templates as **images (PNG/JPG)** or **PDF files**
 - Live preview with **drag-and-drop text positioning**
 - Advanced text editing:
-  - Resize text using handles
+  - Resize text using corner handles
   - Mouse wheel zoom
   - Pinch-to-zoom on touch devices
-  - Smart center snapping
+  - Smart snapping for precise alignment
+- Proper **RTL Arabic text handling**
+  - Arabic names are **right-anchored**
+  - Long names expand left without shifting position
 - Automatic **color palette extraction** from the certificate background
-- Clickable color suggestions for instant styling
 - Optional certificate body text and date (Hijri or Gregorian)
 - Batch generation using a list of names
 - Export options:
@@ -29,14 +31,13 @@ SADEEM X allows you to design, customize, and export professional certificates f
 
 ---
 
-## 🆕 What’s New in v2.1
+## 🆕 What’s New in v2.2
 
-- Advanced text editor with resize handles and snapping
-- Mouse wheel & touch gesture font scaling
-- Improved color extraction accuracy and filtering
-- Refactored text editing logic into a dedicated manager module
-- Enhanced export flow and UI responsiveness
-- Added branded footer with copyright information
+- Fixed Arabic name alignment issue for variable-length names
+- Implemented **right-anchored text positioning** for certificates
+- Ensured consistent layout for short and long Arabic names
+- Improved overall text positioning reliability during export
+- Minor UI and UX refinements
 
 ---
 
@@ -53,17 +54,13 @@ SADEEM X allows you to design, customize, and export professional certificates f
 - `JSZip`
 - `FileSaver.js`
 
----
-
 ## 📁 Project Structure
-
 /index.html
 /styles.css
 /app.js
 /textEditorManager.js
 /colorExtractor.js
 /assets (optional)
-
 
 
 ---
@@ -77,7 +74,7 @@ SADEEM X allows you to design, customize, and export professional certificates f
 5. Customize text, colors, and layout
 6. Export as PDF or ZIP
 
-> No build step or backend required.
+> No build step, backend, or framework required.
 
 ---
 
@@ -85,8 +82,13 @@ SADEEM X allows you to design, customize, and export professional certificates f
 
 - Built using **pure JavaScript** with an OOP approach
 - Text manipulation logic is isolated in `TextEditorManager`
+- Dragging and positioning handled via `DraggableText`
 - Color extraction is handled independently via `ColorExtractor`
-- Designed for easy extension (new text layers, presets, branding, etc.)
+- Designed for easy extension:
+  - Additional text layers
+  - Alignment modes
+  - Templates and presets
+  - Branding and organization-specific layouts
 
 ---
 
@@ -99,5 +101,9 @@ Developed by **Eng. Ahmad Alharthi**
 
 ## 🤝 Contributions
 
-Pull requests and feature suggestions are welcome.  
+Pull requests, bug reports, and feature suggestions are welcome.  
 This project is actively maintained and evolving.
+
+
+## 📁 Project Structure
+
