@@ -467,24 +467,11 @@ input[type="color"] {
 }
 /* ==== Text overlay box for editable texts ==== */
 .text-overlay-box {
-  position: absolute;
-  border: 1px dashed rgba(255, 255, 255, 0.7);
-  box-shadow: 0 0 0 1px rgba(20, 20, 40, 0.25);
-  pointer-events: none;
-  border-radius: 8px;
-  box-sizing: border-box;
+  display: none !important;
 }
 
 .text-overlay-handle {
-  position: absolute;
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #ffffff;
-  border: 1px solid rgba(50, 20, 90, 0.6);
-  box-shadow: 0 0 4px rgba(0, 0, 0, 0.15);
-  pointer-events: auto;
-  cursor: nwse-resize;
+  display: none !important;
 }
 
 /* زوايا */
