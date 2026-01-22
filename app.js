@@ -113,6 +113,8 @@ class CertificateApp {
     this.downloadZipBtn = document.getElementById('downloadZipBtn');
     this.zipRow = document.getElementById('zipRow');
 
+    this.highQualityExportInput = document.getElementById('highQualityExportInput');
+
     this.loadingIndicator = document.getElementById('loadingIndicator');
 
     // المعاينة
@@ -532,12 +534,17 @@ class CertificateApp {
         this.nameInput.value = currentName;
         this.updateTexts();
 
+        const highQuality = this.highQualityExportInput.checked;
+
         const canvas = await html2canvas(this.previewInner, {
-          scale: 2.5,   // زيادة الدقة
+          scale: highQuality ? 3 : 2.5,
           useCORS: true
         });
 
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        const imgData = highQuality
+          ? canvas.toDataURL('image/png')
+          : canvas.toDataURL('image/jpeg', 1);
+
         const pageW = canvas.width;
         const pageH = canvas.height;
         orientation = pageW >= pageH ? 'l' : 'p';
@@ -601,12 +608,17 @@ class CertificateApp {
         this.nameInput.value = currentName;
         this.updateTexts();
 
+        const highQuality = this.highQualityExportInput.checked;
+
         const canvas = await html2canvas(this.previewInner, {
-          scale: 2.5,
+          scale: highQuality ? 3 : 2.5,
           useCORS: true
         });
 
-        const imgData = canvas.toDataURL('image/jpeg', 1.0);
+        const imgData = highQuality
+          ? canvas.toDataURL('image/png')
+          : canvas.toDataURL('image/jpeg', 1);
+
         const pageW = canvas.width;
         const pageH = canvas.height;
         const orientation = pageW >= pageH ? 'l' : 'p';
