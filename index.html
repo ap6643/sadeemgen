@@ -122,6 +122,29 @@
         </div>
       </div>
 
+      <!-- ختم/توقيع -->
+      <div class="field">
+        <div class="toggle-row">
+          <input id="useStampInput" type="checkbox">
+          <span>إضافة ختم أو توقيع</span>
+        </div>
+        <div id="stampSettings" style="display:none; margin-top:6px;">
+          <label>رفع صورة الختم أو التوقيع</label>
+          <input id="stampFileInput" type="file" accept="image/*">
+          <div class="hint">يُفضّل صور PNG بخلفية شفافة.</div>
+          <div class="row" style="margin-top:6px;">
+            <div class="field">
+              <label>حجم الختم</label>
+              <input id="stampSizeInput" type="number" min="40" max="320" value="140">
+            </div>
+            <div class="field">
+              <label>شفافية الختم</label>
+              <input id="stampOpacityInput" type="range" min="20" max="100" value="100">
+            </div>
+          </div>
+        </div>
+      </div>
+
       <div class="row">
         <button id="resetPositionsBtn" class="btn btn-secondary btn-full">
           إعادة ضبط أماكن النصوص
@@ -178,6 +201,7 @@
           <div id="nameText" class="draggable-text" data-role="name">اسم المستلم</div>
           <div id="bodyText" class="draggable-text" data-role="body">نص الشهادة</div>
           <div id="dateText" class="draggable-text" data-role="date">1447-05-21هـ</div>
+          <img id="stampImage" class="draggable-stamp" alt="ختم أو توقيع">
         </div>
 
         <div id="placeholder" class="placeholder">
