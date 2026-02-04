@@ -55,7 +55,10 @@
       <div class="row">
         <div class="field">
           <label>حجم خط الاسم</label>
-          <input id="nameSizeInput" type="number" min="18" max="60" value="26">
+          <div class="range-row">
+            <input id="nameSizeRange" class="range-input range-footer" type="range" min="18" max="60" value="26">
+            <input id="nameSizeInput" class="input-compact" type="number" min="18" max="60" value="26">
+          </div>
         </div>
         <div class="field">
           <label>لون الاسم</label>
@@ -76,7 +79,10 @@
           <div class="row" style="margin-top:6px;">
             <div class="field">
               <label>حجم خط نص الشهادة</label>
-              <input id="bodySizeInput" type="number" min="12" max="40" value="18">
+              <div class="range-row">
+                <input id="bodySizeRange" class="range-input range-footer" type="range" min="12" max="40" value="18">
+                <input id="bodySizeInput" class="input-compact" type="number" min="12" max="40" value="18">
+              </div>
             </div>
             <div class="field">
               <label>لون نص الشهادة</label>
@@ -109,7 +115,10 @@
           <div class="row" style="margin-top:6px;">
             <div class="field">
               <label>حجم خط التاريخ</label>
-              <input id="dateSizeInput" type="number" min="10" max="30" value="14">
+              <div class="range-row">
+                <input id="dateSizeRange" class="range-input range-footer" type="range" min="10" max="30" value="14">
+                <input id="dateSizeInput" class="input-compact" type="number" min="10" max="30" value="14">
+              </div>
             </div>
             <div class="field">
               <label>لون التاريخ</label>
@@ -135,11 +144,14 @@
           <div class="row" style="margin-top:6px;">
             <div class="field">
               <label>حجم الختم</label>
-              <input id="stampSizeInput" type="number" min="40" max="320" value="140">
+              <div class="range-row">
+                <input id="stampSizeRange" class="range-input range-footer" type="range" min="40" max="320" value="140">
+                <input id="stampSizeInput" class="input-compact" type="number" min="40" max="320" value="140">
+              </div>
             </div>
             <div class="field">
               <label>شفافية الختم</label>
-              <input id="stampOpacityInput" type="range" min="20" max="100" value="100">
+              <input id="stampOpacityInput" class="range-input range-header" type="range" min="20" max="100" value="100">
             </div>
           </div>
         </div>

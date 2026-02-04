@@ -100,15 +100,19 @@ class CertificateApp {
     this.dateTypeInput = document.getElementById('dateTypeInput');
     this.dateSizeInput = document.getElementById('dateSizeInput');
     this.dateColorInput = document.getElementById('dateColorInput');
+    this.dateSizeRange = document.getElementById('dateSizeRange');
 
     this.useStampInput = document.getElementById('useStampInput');
     this.stampSettings = document.getElementById('stampSettings');
     this.stampFileInput = document.getElementById('stampFileInput');
     this.stampSizeInput = document.getElementById('stampSizeInput');
     this.stampOpacityInput = document.getElementById('stampOpacityInput');
+    this.stampSizeRange = document.getElementById('stampSizeRange');
 
     this.nameSizeInput = document.getElementById('nameSizeInput');
     this.bodySizeInput = document.getElementById('bodySizeInput');
+    this.nameSizeRange = document.getElementById('nameSizeRange');
+    this.bodySizeRange = document.getElementById('bodySizeRange');
 
     this.nameColorInput = document.getElementById('nameColorInput');
     this.bodyColorInput = document.getElementById('bodyColorInput');
@@ -204,17 +208,43 @@ class CertificateApp {
         const size = Math.round(newSize);
 
         if (key === 'name') {
-          this.nameSizeInput.value = size;
+          this.setSizeInputs(this.nameSizeRange, this.nameSizeInput, size);
           this.nameText.setFontSize(size);
         } else if (key === 'body') {
-          this.bodySizeInput.value = size;
+          this.setSizeInputs(this.bodySizeRange, this.bodySizeInput, size);
           this.bodyText.setFontSize(size);
         } else if (key === 'date') {
-          this.dateSizeInput.value = size;
+          this.setSizeInputs(this.dateSizeRange, this.dateSizeInput, size);
           this.dateText.setFontSize(size);
         }
       }
     });
+  }
+
+  setSizeInputs(rangeInput, numberInput, value) {
+    const strValue = String(value);
+    if (rangeInput && rangeInput.value !== strValue) {
+      rangeInput.value = strValue;
+    }
+    if (numberInput && numberInput.value !== strValue) {
+      numberInput.value = strValue;
+    }
+  }
+
+  bindSizeControls(rangeInput, numberInput, onChange) {
+    if (rangeInput) {
+      rangeInput.addEventListener('input', () => {
+        if (numberInput) numberInput.value = rangeInput.value;
+        onChange();
+      });
+    }
+
+    if (numberInput) {
+      numberInput.addEventListener('input', () => {
+        if (rangeInput) rangeInput.value = numberInput.value;
+        onChange();
+      });
+    }
   }
 
   // ✅ جديد: استخراج ألوان تلقائي بعد تحميل الخلفية (صورة أو PDF)
@@ -261,13 +291,10 @@ class CertificateApp {
     const instantInputs = [
       this.nameInput,
       this.bodyInput,
-      this.nameSizeInput,
-      this.bodySizeInput,
       this.nameColorInput,
       this.bodyColorInput,
       this.dateInput,
       this.dateTypeInput,
-      this.dateSizeInput,
       this.dateColorInput
     ];
     instantInputs.forEach(input => {
@@ -295,6 +322,10 @@ class CertificateApp {
       this.updateTexts();
     });
 
+    this.bindSizeControls(this.nameSizeRange, this.nameSizeInput, () => this.updateTexts());
+    this.bindSizeControls(this.bodySizeRange, this.bodySizeInput, () => this.updateTexts());
+    this.bindSizeControls(this.dateSizeRange, this.dateSizeInput, () => this.updateTexts());
+
     this.useStampInput.addEventListener('change', () => {
       const enabled = this.useStampInput.checked;
       this.stampSettings.style.display = enabled ? 'block' : 'none';
@@ -305,7 +336,9 @@ class CertificateApp {
       this.loadStampFile(event);
     });
 
-    [this.stampSizeInput, this.stampOpacityInput].forEach((input) => {
+    this.bindSizeControls(this.stampSizeRange, this.stampSizeInput, () => this.updateStamp());
+
+    [this.stampOpacityInput].forEach((input) => {
       if (!input) return;
       input.addEventListener('input', () => this.updateStamp());
     });
